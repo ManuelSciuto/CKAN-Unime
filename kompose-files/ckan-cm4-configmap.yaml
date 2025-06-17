@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  00_test_test.patch: test
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: ckan
+  name: ckan-cm4

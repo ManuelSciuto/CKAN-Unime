@@ -1,0 +1,21 @@
+PULIZIA TOTALE MINIKUBE
+
+kubectl delete --all pods --all-namespaces
+kubectl delete --all deployments --all-namespaces
+kubectl delete --all services --all-namespaces
+kubectl delete --all configmaps --all-namespaces
+kubectl delete --all persistentvolumeclaims --all-namespaces
+kubectl delete --all persistentvolumes --all-namespaces
+kubectl delete --all secrets --all-namespaces
+
+CONVERSIONE E CREAZIONE PODS
+
+minikube addons enable storage-provisioner
+minikube addons enable default-storageclass
+
+(Se gli addons erano disattivati)
+minikube stop
+minikube start
+
+kompose convert -f docker-compose.yml -o kompose-files
+kubectl apply -f ./kompose-files
