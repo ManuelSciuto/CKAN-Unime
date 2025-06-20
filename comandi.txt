@@ -17,5 +17,12 @@ minikube addons enable default-storageclass
 minikube stop
 minikube start
 
-kompose convert -f docker-compose.yml -o kompose-files
+mkdir kompose-files
+
+# per creare i pv
+kubectl apply -f ./kompose-files/pv
+
+# per convertire
+###kompose convert -f docker-compose.yml -o kompose-files
+
 kubectl apply -f ./kompose-files

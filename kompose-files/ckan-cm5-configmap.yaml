@@ -1,0 +1,25 @@
+apiVersion: v1
+data:
+  01_setup_datapusher.sh: |
+    #!/bin/bash
+
+    if [[ $CKAN__PLUGINS == *"datapusher"* ]]; then
+       # Datapusher settings have been configured in the .env file
+       # Set API token if necessary
+       if [ -z "$CKAN__DATAPUSHER__API_TOKEN" ] ; then
+          echo "Set up ckan.datapusher.api_token in the CKAN config file"
+          ckan config-tool $CKAN_INI "ckan.datapusher.api_token=$(ckan -c $CKAN_INI user token add ckan_admin datapusher | tail -n 1 | tr -d '\t')"
+       fi
+    else
+       echo "Not configuring DataPusher"
+    fi
+  README.md: |
+    Use scripts in this folder to run extra initialization steps in your custom CKAN images.
+    Any file with `.sh` or `.py` extension will be executed just after the main initialization
+    script (`prerun.py`) is executed and just before the web server and supervisor processes are
+    started.
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: ckan
+  name: ckan-cm5

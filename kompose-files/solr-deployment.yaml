@@ -24,19 +24,15 @@ spec:
     spec:
       containers:
         - image: ckan/ckan-solr:2.10-solr9
-          livenessProbe:
-            exec:
-              command:
-                - wget
-                - -qO
-                - /dev/null
-                - http://localhost:8983/solr/
           name: solr
+          ports:
+            - containerPort: 8983
+              protocol: TCP
           volumeMounts:
             - mountPath: /var/solr
-              name: solr-data
+              name: solr-claim0
       restartPolicy: Always
       volumes:
-        - name: solr-data
+        - name: solr-claim0
           persistentVolumeClaim:
-            claimName: solr-data
+            claimName: solr-claim0

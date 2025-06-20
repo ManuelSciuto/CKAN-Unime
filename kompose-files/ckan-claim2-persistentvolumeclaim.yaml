@@ -2,9 +2,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    io.kompose.service: ckan-storage
-  name: ckan-storage
+    io.kompose.service: ckan-claim2
+  name: ckan-claim2
 spec:
+  selector:
+    matchLabels:
+      io.kompose.service: ckan-claim2
   accessModes:
     - ReadWriteOnce
   resources:

@@ -5,12 +5,12 @@ metadata:
     kompose.cmd: kompose convert -f docker-compose.yml -o kompose-files
     kompose.version: 1.34.0 (cbf2835db)
   labels:
-    io.kompose.service: nginx
-  name: nginx
+    io.kompose.service: redis
+  name: redis
 spec:
   ports:
-    - name: "8443"
-      port: 8443
-      targetPort: 443
+    - name: "6379"
+      port: 6379
+      targetPort: 6379
   selector:
-    io.kompose.service: nginx
+    io.kompose.service: redis

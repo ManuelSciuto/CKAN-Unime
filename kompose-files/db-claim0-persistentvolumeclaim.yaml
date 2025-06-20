@@ -2,9 +2,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    io.kompose.service: pg-data
-  name: pg-data
+    io.kompose.service: db-claim0
+  name: db-claim0
 spec:
+  selector:
+    matchLabels:
+      io.kompose.service: db-claim0
   accessModes:
     - ReadWriteOnce
   resources:

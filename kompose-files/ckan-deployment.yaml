@@ -25,8 +25,7 @@ spec:
       containers:
         - args:
             - /bin/bash
-            - -c
-            - " for d in /app/patches/*; do\n  if [ -d  ]; then\n    for f in $()(ls /*.patch | sort -g); do\n      cd /usr/lib/ckan/$()(basename ) && patch -p1 < ;\n    done;\n  fi;\ndone && /docker-entrypoint.sh "
+            - /apply_patches.sh
           env:
             - name: CKAN_DATAPUSHER_URL
               value: http://datapusher:8800
@@ -36,6 +35,8 @@ spec:
               value: postgresql://ckandbuser:ckandbpassword@db/datastore
             - name: CKAN_REDIS_URL
               value: redis://redis:6379/1
+            - name: CKAN_SOLR_URL
+              value: http://solr:8983/solr/ckan
             - name: CKAN_SITE_ID
               value: default
             - name: CKAN_SITE_URL
@@ -54,53 +55,58 @@ spec:
               value: redis
             - name: CKAN__PLUGINS
               value: image_view text_view datatables_view datastore datapusher envvars
+            - name: CKAN___SECRET_KEY
+              value: g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
             - name: CKAN___API_TOKEN__JWT__DECODE__SECRET
-              value: string:CHANGE_ME
+              value: string:g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
             - name: CKAN___API_TOKEN__JWT__ENCODE__SECRET
-              value: string:CHANGE_ME
+              value: string:g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
             - name: CKAN___BEAKER__SESSION__SECRET
-              value: CHANGE_ME
+              value: g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
             - name: TZ
               value: UTC
           image: ckan/ckan-base:2.11
-          livenessProbe:
-            exec:
-              command:
-                - wget
-                - -qO
-                - /dev/null
-                - http://localhost:5000/api/action/status_show
-            failureThreshold: 3
-            periodSeconds: 60
-            timeoutSeconds: 10
           name: ckan
+          ports:
+            - containerPort: 5000
+              protocol: TCP
           volumeMounts:
             - mountPath: /var/lib/ckan
-              name: ckan-storage
+              name: ckan-claim0
             - mountPath: /root/.cache/pip
-              name: pip-cache
+              name: ckan-claim1
             - mountPath: /usr/lib/python3.10/site-packages
-              name: site-packages
-            - mountPath: /docker-entrypoint.d
+              name: ckan-claim2
+            - mountPath: /apply_patches.sh
               name: ckan-cm3
               readOnly: true
+              subPath: apply_patches.sh
             - mountPath: /app/patches
               name: ckan-cm4
               readOnly: true
+            - mountPath: /docker-entrypoint.d
+              name: ckan-cm5
+              readOnly: true
       restartPolicy: Always
       volumes:
-        - name: ckan-storage
+        - name: ckan-claim0
           persistentVolumeClaim:
-            claimName: ckan-storage
-        - name: pip-cache
+            claimName: ckan-claim0
+        - name: ckan-claim1
           persistentVolumeClaim:
-            claimName: pip-cache
-        - name: site-packages
+            claimName: ckan-claim1
+        - name: ckan-claim2
           persistentVolumeClaim:
-            claimName: site-packages
+            claimName: ckan-claim2
         - configMap:
+            items:
+              - key: apply_patches.sh
+                path: apply_patches.sh
             name: ckan-cm3
           name: ckan-cm3
         - configMap:
             name: ckan-cm4
           name: ckan-cm4
+        - configMap:
+            name: ckan-cm5
+          name: ckan-cm5

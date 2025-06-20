@@ -29,4 +29,7 @@ spec:
                 - -e
                 - QUIT
           name: redis
+          ports:
+            - containerPort: 6379
+              protocol: TCP
       restartPolicy: Always

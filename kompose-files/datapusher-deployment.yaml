@@ -33,4 +33,7 @@ spec:
             periodSeconds: 60
             timeoutSeconds: 10
           name: datapusher
+          ports:
+            - containerPort: 8800
+              protocol: TCP
       restartPolicy: Always

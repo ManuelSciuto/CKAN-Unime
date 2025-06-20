@@ -1,24 +1,4 @@
-volumes:
-  ckan_storage:
-  pg_data:
-  solr_data:
-  pip_cache:
-  site_packages:
-
 services:
-  nginx:
-    build:
-      context: nginx/
-      dockerfile: Dockerfile
-    networks:
-      - webnet
-      - ckannet
-    depends_on:
-      ckan:
-        condition: service_healthy
-    ports:
-      - "0.0.0.0:8443:443"
-
   ckan:
     image: ckan/ckan-base:2.11
     networks:
@@ -41,9 +21,10 @@ services:
       CKAN__HARVEST__MQ__HOSTNAME: redis
       CKAN__HARVEST__MQ__PORT: 6379
       CKAN__HARVEST__MQ__REDIS_DB: 1
-      CKAN___BEAKER__SESSION__SECRET: CHANGE_ME
-      CKAN___API_TOKEN__JWT__ENCODE__SECRET: string:CHANGE_ME
-      CKAN___API_TOKEN__JWT__DECODE__SECRET: string:CHANGE_ME
+      CKAN___SECRET_KEY: g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
+      CKAN___BEAKER__SESSION__SECRET: g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
+      CKAN___API_TOKEN__JWT__ENCODE__SECRET: string:g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
+      CKAN___API_TOKEN__JWT__DECODE__SECRET: string:g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
     depends_on:
       db:
         condition: service_healthy
@@ -52,47 +33,25 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ckan_storage:/var/lib/ckan
-      - pip_cache:/root/.cache/pip
-      - site_packages:/usr/lib/python3.10/site-packages
-      - ./ckan/docker-entrypoint.d:/docker-entrypoint.d:ro
+      - ./data/ckan:/var/lib/ckan
+      - ./data/pip_cache:/root/.cache/pip
+      - ./data/site_packages:/usr/lib/python3.10/site-packages
+      - ./ckan/apply_patches.sh:/apply_patches.sh:ro
       - ./ckan/patches:/app/patches:ro
-    command: >
-      /bin/bash -c "
-      for d in /app/patches/*; do
-        if [ -d $d ]; then
-          for f in $(ls $d/*.patch | sort -g); do
-            cd /usr/lib/ckan/$(basename $d) && patch -p1 < $f;
-          done;
-        fi;
-      done
-      && /docker-entrypoint.sh
-      "
-    restart: unless-stopped
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "-qO",
-          "/dev/null",
-          "http://localhost:5000/api/action/status_show",
-        ]
-      interval: 60s
-      timeout: 10s
-      retries: 3
+      - ./ckan/docker-entrypoint.d:/docker-entrypoint.d:ro
+    command: ["/bin/bash", "/apply_patches.sh"]
+    restart: always
+    ports:
+      - "5000:5000"
 
   datapusher:
     networks:
       - ckannet
       - dbnet
     image: ckan/ckan-base-datapusher:0.0.21
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8800"]
-      interval: 60s
-      timeout: 10s
-      retries: 3
+    restart: always
+    ports:
+      - "8800:8800"
 
   db:
     image: postgres:16-alpine
@@ -107,14 +66,11 @@ services:
       DATASTORE_READONLY_PASSWORD: datastore
       DATASTORE_DB: datastore
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data
       - ./postgresql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    restart: always
+    ports:
+      - "5432:5432"
     networks:
       - dbnet
 
@@ -123,18 +79,18 @@ services:
       - solrnet
     image: ckan/ckan-solr:2.10-solr9
     volumes:
-      - solr_data:/var/solr
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8983/solr/"]
+      - ./data/solr:/var/solr
+    restart: always
+    ports:
+      - "8983:8983"
 
   redis:
     image: redis:6
     networks:
       - redisnet
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "-e", "QUIT"]
+    ports:
+      - "6379:6379"
+    restart: always
 
 networks:
   webnet:

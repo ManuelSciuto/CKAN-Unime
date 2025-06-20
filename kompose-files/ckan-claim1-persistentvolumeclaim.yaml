@@ -2,9 +2,12 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    io.kompose.service: solr-data
-  name: solr-data
+    io.kompose.service: ckan-claim1
+  name: ckan-claim1
 spec:
+  selector:
+    matchLabels:
+      io.kompose.service: ckan-claim1
   accessModes:
     - ReadWriteOnce
   resources:
