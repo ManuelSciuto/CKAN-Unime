@@ -1,9 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f docker-compose.yml -o kompose-files
-    kompose.version: 1.34.0 (cbf2835db)
   labels:
     io.kompose.service: solr
   name: solr
@@ -16,18 +13,29 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert -f docker-compose.yml -o kompose-files
-        kompose.version: 1.34.0 (cbf2835db)
       labels:
         io.kompose.service: solr
     spec:
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 8983:8983 /var/solr"]
+          volumeMounts:
+            - name: solr-claim0
+              mountPath: /var/solr
       containers:
-        - image: ckan/ckan-solr:2.10-solr9
+        - image: ckan/ckan-solr:2.11-solr9
           name: solr
           ports:
             - containerPort: 8983
               protocol: TCP
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
           volumeMounts:
             - mountPath: /var/solr
               name: solr-claim0

@@ -1,12 +1,6 @@
-PULIZIA TOTALE MINIKUBE
+PULIZIA TOTALE MINIKUBE (cancella anche coreDNS ATTENZIONE!!!)
 
-kubectl delete --all pods --all-namespaces
-kubectl delete --all deployments --all-namespaces
-kubectl delete --all services --all-namespaces
-kubectl delete --all configmaps --all-namespaces
-kubectl delete --all persistentvolumeclaims --all-namespaces
-kubectl delete --all persistentvolumes --all-namespaces
-kubectl delete --all secrets --all-namespaces
+kubectl delete deployments,services,configmaps,persistentvolumeclaims,secrets -n default --all
 
 CONVERSIONE E CREAZIONE PODS
 
@@ -22,7 +16,9 @@ mkdir kompose-files
 # per creare i pv
 kubectl apply -f ./kompose-files/pv
 
-# per convertire
-###kompose convert -f docker-compose.yml -o kompose-files
-
 kubectl apply -f ./kompose-files
+
+BUILDARE L'IMMAGINE CKAN
+
+docker build -t ckan-unime:latest ./ckan
+minikube image load ckan-unime:latest

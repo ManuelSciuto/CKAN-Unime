@@ -1,9 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f docker-compose.yml -o kompose-files
-    kompose.version: 1.34.0 (cbf2835db)
   labels:
     io.kompose.service: datapusher
   name: datapusher
@@ -14,9 +11,6 @@ spec:
       io.kompose.service: datapusher
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert -f docker-compose.yml -o kompose-files
-        kompose.version: 1.34.0 (cbf2835db)
       labels:
         io.kompose.service: datapusher
     spec:
@@ -36,4 +30,11 @@ spec:
           ports:
             - containerPort: 8800
               protocol: TCP
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
       restartPolicy: Always

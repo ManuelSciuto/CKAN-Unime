@@ -1,9 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert -f docker-compose.yml -o kompose-files
-    kompose.version: 1.34.0 (cbf2835db)
   labels:
     io.kompose.service: ckan
   name: ckan
@@ -16,16 +13,13 @@ spec:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert -f docker-compose.yml -o kompose-files
-        kompose.version: 1.34.0 (cbf2835db)
       labels:
         io.kompose.service: ckan
     spec:
       containers:
-        - args:
-            - /bin/bash
-            - /apply_patches.sh
+        - name: ckan
+          image: ckan-unime:latest
+          imagePullPolicy: Never
           env:
             - name: CKAN_DATAPUSHER_URL
               value: http://datapusher:8800
@@ -53,6 +47,8 @@ spec:
               value: "1"
             - name: CKAN__HARVEST__MQ__TYPE
               value: redis
+            - name: CKAN__DATAPUSHER__API_TOKEN
+              value: g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
             - name: CKAN__PLUGINS
               value: image_view text_view datatables_view datastore datapusher envvars
             - name: CKAN___SECRET_KEY
@@ -65,25 +61,25 @@ spec:
               value: g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
             - name: TZ
               value: UTC
-          image: ckan/ckan-base:2.11
-          name: ckan
           ports:
             - containerPort: 5000
               protocol: TCP
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
           volumeMounts:
-            - mountPath: /var/lib/ckan
-              name: ckan-claim0
+            #- mountPath: /var/lib/ckan
+            #name: ckan-claim0
             - mountPath: /root/.cache/pip
               name: ckan-claim1
             - mountPath: /usr/lib/python3.10/site-packages
               name: ckan-claim2
-            - mountPath: /apply_patches.sh
-              name: ckan-cm3
-              readOnly: true
-              subPath: apply_patches.sh
-            - mountPath: /app/patches
-              name: ckan-cm4
-              readOnly: true
+            - mountPath: /usr/lib/ckan/default
+              name: ckan-claim2
             - mountPath: /docker-entrypoint.d
               name: ckan-cm5
               readOnly: true
@@ -98,15 +94,6 @@ spec:
         - name: ckan-claim2
           persistentVolumeClaim:
             claimName: ckan-claim2
-        - configMap:
-            items:
-              - key: apply_patches.sh
-                path: apply_patches.sh
-            name: ckan-cm3
-          name: ckan-cm3
-        - configMap:
-            name: ckan-cm4
-          name: ckan-cm4
         - configMap:
             name: ckan-cm5
           name: ckan-cm5
