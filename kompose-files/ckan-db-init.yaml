@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ckan-db-init
+spec:
+  template:
+    spec:
+      containers:
+        - name: ckan-db-init
+          image: ckan-unime:1.0.0
+          imagePullPolicy: Never
+          envFrom:
+            - secretRef:
+                name: ckan-secrets
+          command: ["/bin/bash", "-c"]
+          args:
+            - ckan -c /srv/app/ckan.ini db init && \
+              paster --plugin=ckanext-dcatapit vocabulary initdb --config=/etc/ckan/default/production.ini
+      restartPolicy: Never
+  backoffLimit: 4

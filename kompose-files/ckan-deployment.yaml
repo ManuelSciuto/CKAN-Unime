@@ -18,49 +18,11 @@ spec:
     spec:
       containers:
         - name: ckan
-          image: ckan-unime:latest
+          image: ckan-unime:1.0.0
           imagePullPolicy: Never
-          env:
-            - name: CKAN_DATAPUSHER_URL
-              value: http://datapusher:8800
-            - name: CKAN_DATASTORE_READ_URL
-              value: postgresql://datastore_ro:datastore@db/datastore
-            - name: CKAN_DATASTORE_WRITE_URL
-              value: postgresql://ckandbuser:ckandbpassword@db/datastore
-            - name: CKAN_REDIS_URL
-              value: redis://redis:6379/1
-            - name: CKAN_SOLR_URL
-              value: http://solr:8983/solr/ckan
-            - name: CKAN_SITE_ID
-              value: default
-            - name: CKAN_SITE_URL
-              value: https://localhost:8443
-            - name: CKAN_SQLALCHEMY_URL
-              value: postgresql://ckandbuser:ckandbpassword@db/ckandb
-            - name: CKAN__DATAPUSHER__CALLBACK_URL_BASE
-              value: http://ckan:5000
-            - name: CKAN__HARVEST__MQ__HOSTNAME
-              value: redis
-            - name: CKAN__HARVEST__MQ__PORT
-              value: "6379"
-            - name: CKAN__HARVEST__MQ__REDIS_DB
-              value: "1"
-            - name: CKAN__HARVEST__MQ__TYPE
-              value: redis
-            - name: CKAN__DATAPUSHER__API_TOKEN
-              value: g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
-            - name: CKAN__PLUGINS
-              value: image_view text_view datatables_view datastore datapusher envvars
-            - name: CKAN___SECRET_KEY
-              value: g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
-            - name: CKAN___API_TOKEN__JWT__DECODE__SECRET
-              value: string:g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
-            - name: CKAN___API_TOKEN__JWT__ENCODE__SECRET
-              value: string:g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
-            - name: CKAN___BEAKER__SESSION__SECRET
-              value: g0P3BqsJxJv3_cUE3eT9N8lYZ4qkQz1DJBiTD6Nzm9Y
-            - name: TZ
-              value: UTC
+          envFrom:
+            - secretRef:
+                name: ckan-secrets
           ports:
             - containerPort: 5000
               protocol: TCP

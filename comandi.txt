@@ -1,6 +1,6 @@
 PULIZIA TOTALE MINIKUBE (cancella anche coreDNS ATTENZIONE!!!)
 
-kubectl delete deployments,services,configmaps,persistentvolumeclaims,secrets -n default --all
+kubectl delete deployments,services,configmaps,persistentvolumeclaims,persistentvolumes,jobs,secrets -n default --all
 
 CONVERSIONE E CREAZIONE PODS
 
@@ -20,5 +20,15 @@ kubectl apply -f ./kompose-files
 
 BUILDARE L'IMMAGINE CKAN
 
-docker build -t ckan-unime:latest ./ckan
-minikube image load ckan-unime:latest
+docker build -t ckan-unime:1.0.0 ./ckan
+minikube image load ckan-unime:1.0.0
+
+PORT FORWARDING CKAN
+
+kubectl port-forward pod/ckan-pod 5000  
+
+RELOAD CHANGES
+
+kubectl delete deployments,services,configmaps,persistentvolumeclaims,persistentvolumes,jobs,secrets -n default --all
+kubectl apply -f ./kompose-files/pv
+kubectl apply -f ./kompose-files

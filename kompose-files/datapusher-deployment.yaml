@@ -22,7 +22,7 @@ spec:
                 - wget
                 - -qO
                 - /dev/null
-                - http://localhost:8800
+                - http://127.0.0.1:8800
             failureThreshold: 3
             periodSeconds: 60
             timeoutSeconds: 10
